@@ -17,6 +17,14 @@ Go to your project git hooks directory
     
     cd your_project_dir/.git/hooks
 
-Next download selected hook for example:
+Download selected hook for example:
 
     wget https://raw.github.com/smajti1/git-hooks/master/composer/post-checkout
+
+Make hook executable
+
+    chmod +x post-checkout
+
+## License
+
+This project is licensed under the terms of the [MIT license](https://opensource.org/licenses/MIT)    
