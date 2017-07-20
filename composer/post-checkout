@@ -1,21 +1,38 @@
 #!/bin/sh
+#
+# Hook downloaded from https://github.com/smajti1/git-hooks
+# For more information visit github page or git documentation https://git-scm.com/docs/githooks
+
 PREV_BRANCH=$1
 CURRENT_BRANCH=$2
 
-COLOR_DEFAULT='\033[0m'
-COLOR_YELLOW='\033[1;33m'
-COLOR_RED='\033[0;31m'
-COLOR_GREEN='\033[0;32m'
+SHOW_COLORS=false
+SHOW_MESSAGES=true
 
-if [ $PREV_BRANCH != $CURRENT_BRANCH ]; then
-    DIFF=`git diff-tree --diff-filter=AMTUB --no-commit-id --name-only -r $PREV_BRANCH $CURRENT_BRANCH | grep composer.lock`
-    if [ $DIFF = "composer.lock" ]; then
-        echo "${COLOR_GREEN}git post-checkout hook run"
-        echo "see https://git-scm.com/docs/githooks#_post_checkout${COLOR_DEFAULT}"
-    	echo "${COLOR_YELLOW}composer.lock has changed.\nAutorun composer install${COLOR_DEFAULT}";
-    	composer --no-interaction install;
-        echo "${COLOR_GREEN}end run post-checkout${COLOR_DEFAULT}"
-    fi
+COMPOSER_INSTALL="composer --no-interaction install"
+HOOK_NAME=`basename "$0"`
+
+if [ ${SHOW_COLORS} = true ]; then
+    COLOR_DEFAULT='\033[0m'
+	COLOR_YELLOW='\033[1;33m'
+	COLOR_RED='\033[0;31m'
+	COLOR_GREEN='\033[0;32m'
+fi
+
+if [ ${PREV_BRANCH} = ${CURRENT_BRANCH} ]; then
+	exit 0
+fi
+
+DIFF=`git diff-tree --diff-filter=AMTUB --no-commit-id --name-only -r ${PREV_BRANCH} ${CURRENT_BRANCH} | grep composer.lock`
+
+if [ ${DIFF} ] && [ ${SHOW_MESSAGES} = true ]; then
+	echo "${COLOR_GREEN}git ${HOOK_NAME} hook run${COLOR_DEFAULT}"
+	echo "${COLOR_YELLOW}composer.lock has changed.\nAutorun composer install${COLOR_DEFAULT}";
+	${COMPOSER_INSTALL}
+	echo "${COLOR_GREEN}end run post-checkout${COLOR_DEFAULT}"
+elif [ ${DIFF} ]; then
+    COMPOSER_INSTALL="${COMPOSER_INSTALL} --quiet"
+	${COMPOSER_INSTALL}
 fi
 
 exit 0
